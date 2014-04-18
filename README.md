@@ -1,10 +1,9 @@
 tbb-fp
 ======
 
-Demo project to evaluate fingerprinting defenses in the Tor Browser
+Demo project to evaluate Tor Browser's fingerprinting defense for screen resolution.
 
-Calculate the amount of entropy reduction by the existing screen resolution countermeasure.
-Run simulations with different window resizing parameters and report the entropy of the new distribution (plus some metrics).
+Calculates the amount of entropy reduction by the existing screen resolution countermeasure and runs simulations with different window resizing parameters. Reports the entropy of the new distribution, number of different anonymity sets and some metrics.
 
 Computations are based on Panopticlick database dump found on [Tor Bug Tracker](https://trac.torproject.org/projects/tor/attachment/ticket/4810/panopticlick-screen-resolution-detection.txt).
 
