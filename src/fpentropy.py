@@ -1,5 +1,6 @@
 from __future__ import division
 from math import log, floor
+import matplotlib.pyplot as plt
 import operator
 from sys import maxint
 TBB_COLOR_DEPTH = 24
@@ -137,6 +138,9 @@ def measure_entropy_for_resize_params(counts, resize_param):
 
 
 def print_entropy_for_resize_exp(result, prefix=""):
+    # plot_dist(result["resized"])
+    csv_name = "_".join(str(p) for p in result["resize_params"])
+    write_csv(csv_name, result["resized"])
     print "%s Entropy: %0.2f bits, "\
             "Util: %%%0.2f Resize params: %s Bins: %s - %s" %\
         (prefix, result["entropy"],
@@ -156,6 +160,14 @@ def print_entropy_for_counts(counts, prefix=""):
             "on avg. one in %0.2f share the same value %s"\
             % (prefix, entropy, len(counts), 2 ** entropy,
                sort_by_value(counts)[:100])  # only print first 100 bins
+
+
+def write_csv(prefix, dist_dict):
+    csv_name = "%s.csv" % prefix
+    print "Writing to", csv_name
+    fout = open(csv_name, "w")
+    for k, v in sort_by_value(dist_dict):
+        fout.write("%s,%s\n" % (k, v))
 
 
 def metric1(x):

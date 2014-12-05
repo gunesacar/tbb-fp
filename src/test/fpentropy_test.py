@@ -31,11 +31,11 @@ class Test(unittest.TestCase):
 
     def test_tor_button_resize(self):
         r = fp.tor_button_resize
-        self.assertEqual(("1000x600x24", 1),
-                         r("1024x768x32", fp.ResizeParams()))
-        self.assertEqual(("1000x1000x24", 1),
-                         r("1600x1200x24",
-                        fp.ResizeParams()))
+        default_resize_params = fp.ResizeParams()
+        self.assertEqual(r("1024x768x32", default_resize_params)[0],
+                         "1000x600x24")
+        self.assertEqual(r("1600x1200x24",default_resize_params)[0],
+                         "1000x1000x24")
         self.assertEqual("1000x600x24", r("1280x800x16",
                         fp.ResizeParams())[0])
         self.assertEqual("800x400x24", r("800x600x24",
@@ -46,22 +46,21 @@ class Test(unittest.TestCase):
                         fp.ResizeParams(h_roundto=200))[0])
         self.assertEqual("1000x1400x24", r("1200x1600x24",
                         fp.ResizeParams())[0])
-        self.assertEqual("1000x700x24", r("1200x1600x24",
-                        fp.ResizeParams(min_aspect_ratio=1.1))[0])
-        self.assertEqual("1000x1400x24", r("1200x1600x24",
-                        fp.ResizeParams(min_aspect_ratio=1.2,
-                                        min_aspect_ratio_force_h=2000))[0])
-
-        self.assertEqual("1000x600x24", r("1200x1600x24",
-                        fp.ResizeParams(min_aspect_ratio=1.2))[0])
-        self.assertEqual("1000x600x24", r("1200x1600x24",
-                        fp.ResizeParams(min_aspect_ratio=1.1,
-                                        h_roundto=200))[0])
         self.assertEqual("1000x400x24", r("1000x600x24",
                         fp.ResizeParams())[0])
-        self.assertEqual("1000x400x24", r("1000x600x24",
-                        fp.ResizeParams(toolbar_h=200))[0])
 
+    def test_max_w_capping(self):
+        r = fp.tor_button_resize
+        resize_params = fp.ResizeParams(max_w=500)
+        self.assertEqual(r("1600x1200x24", resize_params)[0],
+                         "500x1000x24")
+
+    def test_max_h_capping(self):
+        r = fp.tor_button_resize
+        resize_params = fp.ResizeParams(max_h=500)
+        self.assertEqual(r("1600x1200x24", resize_params)[0],
+                         "1000x500x24")
+    
     def test_get_entropy_from_counts(self):
         td = {"1024x768x24": 10}
         self.assertEqual(0, fp.get_entropy_from_counts(td))
