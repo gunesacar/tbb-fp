@@ -60,6 +60,15 @@ class Test(unittest.TestCase):
         resize_params = fp.ResizeParams(max_h=500)
         self.assertEqual(r("1600x1200x24", resize_params)[0],
                          "1000x500x24")
+
+    def test_get_min_entropy_from_counts(self):
+        td = {"1024x768x24": 10}
+        self.assertEqual(0, fp.get_min_entropy_from_counts(td))
+        td = {"1024x768x24": 1, "1600x900x24": 15}
+        self.assertEqual(4, fp.get_min_entropy_from_counts(td))
+        td = {"1024x768x24": 2, "1600x900x24": 4, "1600x1000x24": 2**21 - 6}
+        self.assertEqual(20, fp.get_min_entropy_from_counts(td))
+        
     
     def test_get_entropy_from_counts(self):
         td = {"1024x768x24": 10}

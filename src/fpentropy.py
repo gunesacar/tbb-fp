@@ -20,11 +20,16 @@ class ResizeParams:
 # torbutton resize the browser window with these parameters.
 
 resize_params = ((200, 100, 1000, 0),  # ~default
+                 (200, 100, 1000, 800),  # max h = 900px
                  (200, 100, 1000, 900),  # max h = 900px
                  (200, 100, 1000, 1000),  # max h = 1000px
                  (200, 100, 1000, 1100),  # max h = 1100px
                  (200, 100, 1000, 1200),  # max h = 1200px
                  (200, 100, 1000, 1300),  # max h = 1300px
+                 (200, 100, 1000, 1400),  # max h = 1300px
+                 (200, 100, 1000, 1500),  # max h = 1300px
+                 (200, 100, 1000, 1600),  # max h = 1300px
+                 (200, 100, 1000, 1700),  # max h = 1300px
                  )
 
 
@@ -67,6 +72,13 @@ def get_entropy_from_counts(count_dict):
     # compute entropy as the expected value of the surprisal
     entropy = total_surprisal / total_observations
     return entropy
+
+
+def get_min_entropy_from_counts(count_dict):
+    """Return min entropy of a random variable given values and frequencies."""
+    total_observations = sum(count_dict.itervalues())
+    worst_case_count = min(count_dict.itervalues())
+    return surprisal(worst_case_count / total_observations)
 
 
 def tor_button_resize(resolution, resize_param):
@@ -133,7 +145,9 @@ def measure_entropy_for_resize_params(counts, resize_param):
     """Return entropy for transformed screen resolutions."""
     resized, util = torb_resize_all(counts, ResizeParams(*resize_param))
     entropy = get_entropy_from_counts(resized)
+    min_entropy = get_min_entropy_from_counts(resized)
     return {"resized": resized, "entropy": entropy,
+            "min_entropy":min_entropy,
             "utilization": util, "resize_params": resize_param}
 
 
@@ -141,9 +155,9 @@ def print_entropy_for_resize_exp(result, prefix=""):
     # plot_dist(result["resized"])
     csv_name = "_".join(str(p) for p in result["resize_params"])
     write_csv(csv_name, result["resized"])
-    print "%s Entropy: %0.2f bits, "\
+    print "%s Entropy: %0.2f bits, Min-Entropy: %0.2f bits, "\
             "Util: %%%0.2f Resize params: %s Bins: %s - %s" %\
-        (prefix, result["entropy"],
+        (prefix, result["entropy"], result["min_entropy"],
          result["utilization"] * 100, result["resize_params"],
          len(result["resized"]), sort_by_value(result["resized"]))
 
@@ -156,9 +170,10 @@ def print_entropy_for_resize_exps(results, prefix=""):
 def print_entropy_for_counts(counts, prefix=""):
     # TODO merge with other prin function
     entropy = get_entropy_from_counts(counts)
-    print "%s Entropy: %0.2f bits, Bins: %s, "\
+    min_entropy = get_min_entropy_from_counts(counts)
+    print "%s Entropy: %0.2f bits, Min-Entropy: %0.2f bits, Bins: %s, "\
             "on avg. one in %0.2f share the same value %s"\
-            % (prefix, entropy, len(counts), 2 ** entropy,
+            % (prefix, entropy, min_entropy, len(counts), 2 ** entropy,
                sort_by_value(counts)[:100])  # only print first 100 bins
 
 
