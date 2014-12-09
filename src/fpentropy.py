@@ -20,6 +20,17 @@ class ResizeParams:
 # torbutton resize the browser window with these parameters.
 
 resize_params = ((200, 100, 1000, 0),  # ~default
+                 (200, 100, 1200, 0),  # ~default
+                 (200, 100, 1400, 0),  # ~default
+                 (200, 100, 1600, 0),  # ~default
+                 (200, 100, 1800, 0),  # ~default
+                 (200, 100, 1000, 1000),  # ~default
+                 (200, 200, 1000, 1000),  # ~default
+                 (200, 100, 1200, 1000),  # ~default
+                 (200, 200, 1200, 1000),  # ~default
+                 (200, 100, 1400, 1000),  # ~default
+                 (200, 100, 1600, 1000),  # ~default
+                 (200, 100, 1800, 1000),  # ~default
                  (200, 100, 1000, 800),  # max h = 900px
                  (200, 100, 1000, 900),  # max h = 900px
                  (200, 100, 1000, 1000),  # max h = 1000px
@@ -41,15 +52,14 @@ def sort_by_value(d, reverse=True):
 def read_sql_output(filename):
     """Read the sql output from the Panopticlick database."""
     counts = {}
-    with open(filename) as f:
-        for l in f.readlines():
-            try:
-                #value, count = (s.strip() for s in l.split("|")[1:3])
-                value, count = l.rsplit(None, 1)
-                counts[value] = int(count)
-            except:
-                #print "Cannot find value and count:", l
-                pass
+    for l in open(filename).readlines():
+        try:
+            #value, count = (s.strip() for s in l.split("|")[1:3])
+            value, count = l.rsplit(None, 1)
+            counts[value] = int(count)
+        except:
+            #print "Cannot find value and count:", l
+            pass
     return counts
 
 
@@ -156,10 +166,10 @@ def print_entropy_for_resize_exp(result, prefix=""):
     csv_name = "_".join(str(p) for p in result["resize_params"])
     write_csv(csv_name, result["resized"])
     print "%s Entropy: %0.2f bits, Min-Entropy: %0.2f bits, "\
-            "Util: %%%0.2f Resize params: %s Bins: %s - %s" %\
+            "Util: %%%0.2f Bins: %s Resize params: %s - %s" %\
         (prefix, result["entropy"], result["min_entropy"],
-         result["utilization"] * 100, result["resize_params"],
-         len(result["resized"]), sort_by_value(result["resized"]))
+         result["utilization"] * 100, len(result["resized"]),
+         result["resize_params"], sort_by_value(result["resized"]))
 
 
 def print_entropy_for_resize_exps(results, prefix=""):
@@ -215,7 +225,26 @@ def run_resolution_entropy_exp(data_file):
     print "\n***Results for different resize parameters***"
     print_entropy_for_resize_exps(exp_results)
 
+def write_list_to_csv(lines, dump_file):
+    with open(dump_file, "w") as f:
+        f.write("\n".join(lines))
+
+def convert_screen_sql_dump_to_csv(dump_file):
+    resols = []
+    counts = read_sql_output(dump_file)
+    print "Total data points: %s" % sum(counts.itervalues())
+    for res, count in counts.iteritems():
+        try:
+            w, h, bit_depth = map(int, res.split("x")[:3])
+            if w > 0 and w < 5000 and h > 0 and h < 5000 and bit_depth > 0 and bit_depth <= 48: 
+                resols.append("%s,%s,%s,%s" % (w, h, bit_depth, count))
+        except:
+            # print " Exc!"
+            pass
+    write_list_to_csv(resols, dump_file+".csv")
+
 if __name__ == '__main__':
     filename = "panopticlick-screen-resolution.txt"  # original DB dump
     filename = "../scr.txt"  # 2014-8 data
-    run_resolution_entropy_exp(filename)
+    convert_screen_sql_dump_to_csv(filename)
+    # run_resolution_entropy_exp(filename)
